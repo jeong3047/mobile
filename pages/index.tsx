@@ -18,8 +18,7 @@ const startPlayer = async () => {
   }
 
   try {
-    const old_test_url = `https://old.nurse-edu.co.kr/AquaN/Mobile/player.php?mtype=${mtype}&leccode=2307040001&idx=4667&attcode=240911140324940`
-    const response = await fetch(old_test_url);
+    const response = await fetch(`/api/player?mtype=${mtype}`);
     const data: { redirectUrl?: string; error?: string } = await response.json();
 
     if (response.ok && data.redirectUrl) {
