@@ -1,13 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { exec } from 'child_process';
 
-type Data = {
-  redirectUrl?: string;
-  error?: string;
-  details?: string;
-};
-
-export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -15,50 +8,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Data>)
 
   const { mtype } = req.query;
 
-  if (typeof mtype !== 'string') {
-    res.status(400).json({ error: 'Invalid mtype parameter' });
-    return;
-  }
-
-  const Url = "http://cdn.foo.com/vod/file.mp4";
-  const Master_key = "mskey";
-  const TimeOut = "60";
-  const userID = "CDNTest";
-
-  const WebServerTime = Math.round(Date.now() / 1000);
-  const AquaAuth = "1";
-
-  const serverIp =
-    req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-
-  let return_url = "";
+  const old_nurse_enc = "jxxiGvFkip86J7pxfiiiLqpUXjs+s88Zvw1res07YI3QYUrOkJf6+ocza2pclMDl+n+b4XDuAq3+q5pL1JA/fbhf+iny1fmEsLhHH1+zAgFnViTSwDFPlKU9t7141yaUyG+uhXfJjTX7vzqXeBPY/XZtssUiPweJ93aE46ulzYU1Ip2gSuVK3euWCpImNENR4Mid/IME2HHE88cPH82HmW1O4nTE+Lu5WRm5UEP6whboKo52CWd43dyYYxxZoIUu1Ewu8Ovqku3tYLF+SBdBk4boIEtRFZag39RbrDjvXetPoRcwS9vOsyFEOUFm+gwLasggg03CjFD0tVsL0Ex3egzPdnsgyc9X+XvhzIDOlIMmNH5gvgE5TkpQ1Ua/HWbLu0bRTDyy0IH7zZ8R0kerDz2DxrdP59tjzruwQQQHCaDqB/8rUA19r13R8bW4QLx2B4OqiH5Fw/v57bLH+31Sg+ZQbi7eNLIIX70yro+iXbXFx7tGADBoj0ZTMkeh/11VrryIz0Lnx6kbfVy/lEkaJd5d/jhqgvoLReIIw6XR9zi+TjImn4hB9DketVGdw5UzMDI0cGcvMDEubTR2"
+  const encParam = old_nurse_enc;
+  const iosUrl = `cdnmp://cddr_dnp/webstream?param=${encParam}`;
+  const androidUrl = `intent://cddr_dnp/webstream?param=${encParam}#Intent;scheme=cdnmp;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.cdn.aquanmanager;end`;
+  
   if (mtype === "iOS") {
-    return_url = ""; // iOS return URL
+    res.json({ redirectUrl: iosUrl });
+  } else {
+    res.json({ redirectUrl: androidUrl });
   }
-
-  let param = `MasterKey=${Master_key}&userid=${userID}&serverip=${serverIp}`;
-  param += `&WebServerTime=${WebServerTime}&AquaAuth=${AquaAuth}&timeout=${TimeOut}`;
-  if (return_url) {
-    param += `&return_url=${encodeURIComponent(return_url)}`;
-  }
-  param += `&url=${Url}`;
-
-  const command = `./Module/ENCAQALINK_V2_x64 -t ENC "${param}"`;
-
-  exec(command, (error, stdout, stderr) => {
-    if (error) {
-      res.status(500).json({ error: 'Internal server error', details: stderr });
-      return;
-    }
-
-    const encParam = stdout.trim();
-    const iosUrl = `cdnmp://cddr_dnp/webstream?param=${encParam}`;
-    const androidUrl = `intent://cddr_dnp/webstream?param=${encParam}#Intent;scheme=cdnmp;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;package=com.cdn.aquanmanager;end`;
-
-    if (mtype === "iOS") {
-      res.json({ redirectUrl: iosUrl });
-    } else {
-      res.json({ redirectUrl: androidUrl });
-    }
-  });
+  
 }

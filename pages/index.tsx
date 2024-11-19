@@ -1,5 +1,4 @@
 // pages/player.tsx
-import { useEffect } from 'react';
 import Router from 'next/router';
 
 const detectPlatform = (): 'iOS' | 'Android' | null => {
@@ -12,14 +11,15 @@ const detectPlatform = (): 'iOS' | 'Android' | null => {
 };
 
 const startPlayer = async () => {
-  const mtype = detectPlatform();
+  const mtype = detectPlatform() ?? "iOS";
   if (!mtype) {
     alert('Unsupported platform');
     return;
   }
 
   try {
-    const response = await fetch(`/api/player?mtype=${mtype}`);
+    const old_test_url = `https://old.nurse-edu.co.kr/AquaN/Mobile/player.php?mtype=${mtype}&leccode=2307040001&idx=4667&attcode=240911140324940`
+    const response = await fetch(old_test_url);
     const data: { redirectUrl?: string; error?: string } = await response.json();
 
     if (response.ok && data.redirectUrl) {
